@@ -1,4 +1,3 @@
-use-asynk-resource
 # useAsynkResource
 
 ## Example
