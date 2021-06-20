@@ -14,6 +14,7 @@
     "race-condition"
   ],
   "author": "Danuel <public.danuel@gmail.com>",
+  "repository": "https://github.com/Danue1/use-asynk-resource",
   "license": "MIT",
   "dependencies": {
     "react": "^17.0.2"
