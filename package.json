@@ -1,6 +1,6 @@
 {
   "name": "use-asynk-resource",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "const resource = useAsyncResource(resolve => load => commit, [...dependencyList)",
   "main": "dist/index.js",
   "types": "types",
