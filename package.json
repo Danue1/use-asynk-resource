@@ -1,0 +1,24 @@
+{
+  "name": "use-asynk-resource",
+  "version": "1.0.2",
+  "description": "const resource = useAsyncResource(resolve => load => commit, [...dependencyList)",
+  "main": "dist/index.js",
+  "types": "types",
+  "keywords": [
+    "react",
+    "hooks",
+    "async",
+    "await",
+    "effect",
+    "resource",
+    "race-condition"
+  ],
+  "author": "Danuel <public.danuel@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.11"
+  }
+}
