@@ -4,7 +4,7 @@ export type FetchResource<T> = (resolve: Resolve) => Promise<CommitResource<T>>;
 
 export type Resolve = <T>(promise: Promise<T>) => Promise<T>;
 
-export type CommitResource<T> = T | (() => T);
+export type CommitResource<T> = { readonly default: T } | (() => T);
 
 export type Resource<T> = {
   readonly read: () => T;
@@ -40,7 +40,9 @@ const createInternalResource = <T>(
     fn(resolve).then<T, T>(
       commit => {
         if (isMounted()) {
-          return typeof commit === "function" ? (commit as () => T)() : commit;
+          return typeof commit === "function"
+            ? (commit as () => T)()
+            : commit.default;
         }
         return null as unknown as T;
       },
@@ -57,12 +59,13 @@ const createInternalResource = <T>(
 };
 
 export const createResource = <T>(
-  promise: Promise<T>,
+  fn: Promise<T> | (() => Promise<T>),
   fetch: (fn: FetchResource<T>) => void
 ): Resource<T> => {
   let status: "pending" | "done" | "error" = "pending";
   let result: T;
 
+  const promise = typeof fn === "function" ? fn() : fn;
   const suspender = promise.then(
     ret => {
       status = "done";

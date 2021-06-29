@@ -25,7 +25,7 @@ const createInternalResource = (fn, isMounted, fetch) => {
     fn(resolve).then(
       commit => {
         if (isMounted()) {
-          return typeof commit === "function" ? commit() : commit;
+          return typeof commit === "function" ? commit() : commit.default;
         }
         return null;
       },
@@ -41,10 +41,11 @@ const createInternalResource = (fn, isMounted, fetch) => {
   return resource;
 };
 
-export const createResource = (promise, fetch) => {
+export const createResource = (fn, fetch) => {
   let status = "pending";
   let result;
 
+  const promise = typeof fn === "function" ? fn() : fn;
   const suspender = promise.then(
     ret => {
       status = "done";
