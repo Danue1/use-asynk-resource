@@ -8,16 +8,19 @@ export type CommitResource<T> = { readonly default: T } | (() => T);
 
 export type Resource<T> = {
   readonly read: () => T;
-  readonly fetch: (fn: FetchResource<T>) => void;
 };
 
-export const useAsyncResource = <T>(fetch: FetchResource<T>): Resource<T> => {
+export const useAsyncResource = <T>(fetch: FetchResource<T>) => {
   const isMounted = (): boolean => ref.current === resource;
   const fetchResource = (fn: FetchResource<T>): void =>
-    setResource(createInternalResource(fn, isMounted, fetchResource));
-  const [resource, setResource] = useState(() =>
-    createInternalResource(fetch, isMounted, fetchResource)
-  );
+    setResource({
+      ...createInternalResource(fn, isMounted),
+      fetch: fetchResource,
+    });
+  const [resource, setResource] = useState(() => ({
+    ...createInternalResource(fetch, isMounted),
+    fetch: fetchResource,
+  }));
   const ref = useRef<Resource<T>>();
   ref.current = resource;
   return resource;
@@ -25,9 +28,8 @@ export const useAsyncResource = <T>(fetch: FetchResource<T>): Resource<T> => {
 
 const createInternalResource = <T>(
   fn: FetchResource<T>,
-  isMounted: () => boolean,
-  fetch: (fn: FetchResource<T>) => void
-) => {
+  isMounted: () => boolean
+): Resource<T> => {
   const resolve = <T>(promise: Promise<T>): Promise<T> =>
     promise.then(item => {
       if (isMounted()) {
@@ -36,7 +38,7 @@ const createInternalResource = <T>(
       // eslint-disable-next-line
       throw null;
     });
-  const resource = createResource(
+  return createResource(
     fn(resolve).then<T, T>(
       commit => {
         if (isMounted()) {
@@ -52,20 +54,14 @@ const createInternalResource = <T>(
         }
         return null as unknown as T;
       }
-    ),
-    fetch
+    )
   );
-  return resource;
 };
 
-export const createResource = <T>(
-  fn: Promise<T> | (() => Promise<T>),
-  fetch: (fn: FetchResource<T>) => void
-): Resource<T> => {
+export const createResource = <T>(promise: Promise<T>): Resource<T> => {
   let status: "pending" | "done" | "error" = "pending";
   let result: T;
 
-  const promise = typeof fn === "function" ? fn() : fn;
   const suspender = promise.then(
     ret => {
       status = "done";
@@ -91,5 +87,5 @@ export const createResource = <T>(
     }
   };
 
-  return { read, fetch };
+  return { read };
 };
